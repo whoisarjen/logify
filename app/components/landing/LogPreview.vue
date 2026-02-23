@@ -11,44 +11,49 @@ interface LogEntry {
 const activeFilter = ref<'all' | LogLevel>('all')
 const searchQuery = ref('')
 
-const logEntries: LogEntry[] = [
+// Generate dynamic timestamps relative to now
+function recentTimestamp(secondsAgo: number): string {
+  return new Date(Date.now() - secondsAgo * 1000).toISOString()
+}
+
+const logEntries = computed<LogEntry[]>(() => [
   {
-    timestamp: '2026-02-23T14:32:01.847Z',
+    timestamp: recentTimestamp(2),
     level: 'error',
     service: 'payment-service',
     message: 'Failed to process payment: card declined (4xxx-xxxx-xxxx-9012)',
   },
   {
-    timestamp: '2026-02-23T14:32:00.234Z',
+    timestamp: recentTimestamp(4),
     level: 'warn',
     service: 'api-gateway',
     message: 'Rate limit approaching for key lgfy_prod_8f3k (82/100 requests)',
   },
   {
-    timestamp: '2026-02-23T14:31:58.102Z',
+    timestamp: recentTimestamp(6),
     level: 'info',
     service: 'auth-service',
     message: 'User authenticated successfully via OAuth (usr_123)',
   },
   {
-    timestamp: '2026-02-23T14:31:55.891Z',
+    timestamp: recentTimestamp(9),
     level: 'debug',
     service: 'worker-pool',
     message: 'Job queue processed: 47 items in 1.2s (avg 25ms/item)',
   },
   {
-    timestamp: '2026-02-23T14:31:54.456Z',
+    timestamp: recentTimestamp(11),
     level: 'info',
     service: 'auth-service',
     message: 'New session created for user usr_456 (TTL: 24h)',
   },
   {
-    timestamp: '2026-02-23T14:31:52.003Z',
+    timestamp: recentTimestamp(14),
     level: 'error',
     service: 'storage-service',
     message: 'Connection timeout after 30s: unable to reach replica db-read-02',
   },
-]
+])
 
 const filters: { label: string; value: 'all' | LogLevel }[] = [
   { label: 'All', value: 'all' },
@@ -59,7 +64,7 @@ const filters: { label: string; value: 'all' | LogLevel }[] = [
 ]
 
 const filteredLogs = computed(() => {
-  return logEntries.filter((entry) => {
+  return logEntries.value.filter((entry) => {
     if (activeFilter.value !== 'all' && entry.level !== activeFilter.value) return false
     if (searchQuery.value) {
       const q = searchQuery.value.toLowerCase()
@@ -94,23 +99,31 @@ const levelConfig: Record<LogLevel, { badge: string; dot: string }> = {
 function formatTime(isoString: string): string {
   return isoString.split('T')[1]?.replace('Z', '') || ''
 }
+
+function filterBtnClass(value: string): string {
+  if (activeFilter.value !== value) return 'text-surface-500 hover:bg-surface-800/50 hover:text-surface-300'
+  if (value === 'all') return 'bg-surface-700 text-white'
+  if (value === 'error') return 'bg-error/15 text-error'
+  if (value === 'warn') return 'bg-warning/15 text-warning'
+  if (value === 'info') return 'bg-info/15 text-info'
+  return 'bg-debug/15 text-debug'
+}
+
+const sectionRef = useReveal()
 </script>
 
 <template>
-  <section class="relative py-24 sm:py-32">
+  <section ref="sectionRef" class="reveal relative py-24 sm:py-32">
     <!-- Background accent -->
-    <div
-      class="pointer-events-none absolute inset-0 flex items-center justify-center"
-      aria-hidden="true"
-    >
-      <div class="h-[500px] w-[700px] rounded-full bg-primary-600/5 blur-[100px]" />
+    <div class="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
+      <div class="h-125 w-175 rounded-full bg-primary-600/5 blur-[100px]" />
     </div>
 
     <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <!-- Section header -->
       <div class="mx-auto max-w-2xl text-center">
         <span class="text-sm font-semibold uppercase tracking-wider text-primary-400">Log Viewer</span>
-        <h2 class="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+        <h2 class="mt-3 text-3xl font-bold text-white sm:text-4xl lg:text-5xl" style="letter-spacing: -0.025em">
           Your logs, <span class="text-gradient">beautifully organized</span>
         </h2>
         <p class="mt-4 text-base text-surface-400 sm:text-lg">
@@ -128,20 +141,7 @@ function formatTime(isoString: string): string {
               <button
                 v-for="filter in filters"
                 :key="filter.value"
-                :class="[
-                  'rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200',
-                  activeFilter === filter.value
-                    ? filter.value === 'all'
-                      ? 'bg-surface-700 text-white'
-                      : filter.value === 'error'
-                        ? 'bg-error/15 text-error'
-                        : filter.value === 'warn'
-                          ? 'bg-warning/15 text-warning'
-                          : filter.value === 'info'
-                            ? 'bg-info/15 text-info'
-                            : 'bg-debug/15 text-debug'
-                    : 'text-surface-500 hover:bg-surface-800/50 hover:text-surface-300',
-                ]"
+                :class="['rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200', filterBtnClass(filter.value)]"
                 @click="activeFilter = filter.value"
               >
                 {{ filter.label }}
@@ -150,14 +150,7 @@ function formatTime(isoString: string): string {
 
             <!-- Search bar -->
             <div class="relative">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-              >
+              <svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607z" />
               </svg>
               <input
@@ -170,7 +163,8 @@ function formatTime(isoString: string): string {
           </div>
 
           <!-- Table header -->
-          <div class="hidden border-b border-surface-800/50 bg-surface-950/50 px-4 py-2 sm:px-6 md:grid md:grid-cols-[140px_80px_130px_1fr] md:gap-4">
+          <div class="hidden border-b border-surface-800/50 bg-surface-950/50 px-4 py-2 sm:px-6 md:grid md:grid-cols-[32px_140px_80px_130px_1fr] md:gap-4">
+            <span class="text-xs font-medium uppercase tracking-wider text-surface-600">#</span>
             <span class="text-xs font-medium uppercase tracking-wider text-surface-600">Timestamp</span>
             <span class="text-xs font-medium uppercase tracking-wider text-surface-600">Level</span>
             <span class="text-xs font-medium uppercase tracking-wider text-surface-600">Service</span>
@@ -188,10 +182,13 @@ function formatTime(isoString: string): string {
               leave-to-class="opacity-0"
             >
               <div
-                v-for="log in filteredLogs"
+                v-for="(log, index) in filteredLogs"
                 :key="log.timestamp + log.message"
-                class="group px-4 py-2.5 transition-colors duration-150 hover:bg-surface-800/20 sm:px-6 sm:py-3 md:grid md:grid-cols-[140px_80px_130px_1fr] md:items-center md:gap-4"
+                class="group px-4 py-2.5 transition-colors duration-150 hover:bg-surface-800/20 sm:px-6 sm:py-3 md:grid md:grid-cols-[32px_140px_80px_130px_1fr] md:items-center md:gap-4"
               >
+                <!-- Line number -->
+                <span class="hidden font-mono text-[11px] text-surface-600 md:block">{{ index + 1 }}</span>
+
                 <!-- Timestamp -->
                 <span class="font-mono text-xs text-surface-500">
                   {{ formatTime(log.timestamp) }}
@@ -227,14 +224,7 @@ function formatTime(isoString: string): string {
               v-if="filteredLogs.length === 0"
               class="flex flex-col items-center justify-center px-4 py-12 text-center"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="mb-3 h-8 w-8 text-surface-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
+              <svg class="mb-3 h-8 w-8 text-surface-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607z" />
               </svg>
               <p class="text-sm text-surface-500">No logs match your filters</p>
@@ -245,9 +235,7 @@ function formatTime(isoString: string): string {
           <div class="flex items-center justify-between border-t border-surface-800 px-4 py-2.5 sm:px-6">
             <div class="flex items-center gap-2">
               <span class="h-2 w-2 rounded-full bg-success animate-pulse-dot" />
-              <span class="text-xs text-surface-500">
-                Live
-              </span>
+              <span class="text-xs text-surface-500">Live</span>
             </div>
             <span class="font-mono text-xs text-surface-600">
               {{ filteredLogs.length }} entries

@@ -129,7 +129,7 @@ function getIconBgColor(color: string) {
       <div
         v-for="stat in cards"
         :key="stat.label"
-        class="rounded-xl border border-surface-800 bg-surface-900/50 p-5 hover:border-surface-700 transition-colors"
+        class="rounded-xl border border-surface-800 bg-surface-900/50 p-5 transition-all duration-200 hover:border-surface-700 hover:bg-surface-900/80"
       >
         <div class="flex items-start justify-between mb-4">
           <div

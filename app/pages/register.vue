@@ -37,7 +37,11 @@ watch([name, email, password, confirmPassword], () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface-950 text-surface-200 flex flex-col">
+  <div class="relative min-h-screen bg-surface-950 text-surface-200 flex flex-col">
+    <!-- Background decoration -->
+    <div class="pointer-events-none fixed inset-0 bg-grid-dots bg-grid-mask" aria-hidden="true" />
+    <div class="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 h-100 w-150 rounded-full bg-primary-600/5 blur-[120px]" aria-hidden="true" />
+
     <!-- Logo header -->
     <div class="flex justify-center pt-12 pb-8">
       <NuxtLink to="/" class="flex items-center gap-2.5 group">
@@ -61,9 +65,9 @@ watch([name, email, password, confirmPassword], () => {
     </div>
 
     <!-- Card -->
-    <div class="flex-1 flex items-start justify-center px-4">
+    <div class="relative flex-1 flex items-start justify-center px-4">
       <div class="w-full max-w-sm animate-fade-in-up">
-        <div class="rounded-2xl border border-surface-800 bg-surface-900/50 p-8">
+        <div class="rounded-2xl border border-surface-800 bg-surface-900/70 backdrop-blur-sm p-8">
           <div class="text-center mb-8">
             <h1 class="text-xl font-bold text-surface-50">Create your account</h1>
             <p class="text-sm text-surface-500 mt-1">Start managing your logs today</p>

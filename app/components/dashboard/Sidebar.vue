@@ -95,7 +95,7 @@ defineExpose({ toggleSidebar })
 
   <!-- Sidebar -->
   <aside
-    class="fixed top-0 left-0 z-50 h-screen w-[240px] flex flex-col bg-surface-900 border-r border-surface-800 transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto"
+    class="fixed top-0 left-0 z-50 h-screen w-60 flex flex-col bg-surface-900 border-r border-surface-800 transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto"
     :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
   >
     <!-- Logo -->
@@ -129,7 +129,7 @@ defineExpose({ toggleSidebar })
             class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
             :class="
               isActive(item.to)
-                ? 'bg-primary-500/10 text-primary-400 border-l-2 border-primary-500 ml-0 pl-[10px]'
+                ? 'bg-primary-500/10 text-primary-400 border-l-2 border-primary-500 ml-0 pl-2.5'
                 : 'text-surface-400 hover:text-surface-200 hover:bg-surface-800/60'
             "
           >

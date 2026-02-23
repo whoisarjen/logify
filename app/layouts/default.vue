@@ -1,7 +1,10 @@
 <template>
-  <div class="min-h-screen bg-surface-950 text-surface-200">
+  <div class="relative min-h-screen bg-surface-950 text-surface-200">
+    <!-- Dot grid background overlay -->
+    <div class="pointer-events-none fixed inset-0 bg-grid-dots bg-grid-mask" aria-hidden="true" />
+
     <LandingNavbar />
-    <main>
+    <main class="relative">
       <slot />
     </main>
     <LandingFooter />
