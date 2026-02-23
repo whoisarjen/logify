@@ -1,7 +1,14 @@
 <script setup lang="ts">
-// Check session cookie to decide Dashboard vs Sign In.
-// No API call needed — cookie presence is enough for the navbar UI.
-const hasSession = useCookie('logify_session')
+const { isAuthenticated, fetchUser } = useAuth()
+
+// Cookie is httpOnly so useCookie only works during SSR.
+// Fetch user once on the server if the cookie exists (no client-side call for guests).
+if (import.meta.server) {
+  const sessionCookie = useCookie('logify_session')
+  if (sessionCookie.value && !isAuthenticated.value) {
+    await fetchUser()
+  }
+}
 
 const mobileMenuOpen = ref(false)
 
@@ -76,7 +83,7 @@ function closeMobileMenu() {
 
         <!-- Desktop CTA -->
         <div class="hidden md:flex md:items-center md:gap-3">
-          <template v-if="hasSession">
+          <template v-if="isAuthenticated">
             <NuxtLink
               to="/dashboard"
               class="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-4 py-1.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-500 active:scale-[0.97]"
@@ -176,7 +183,7 @@ function closeMobileMenu() {
           </template>
 
           <div class="mt-2 flex flex-col gap-2 border-t border-surface-800/50 pt-3">
-            <template v-if="hasSession">
+            <template v-if="isAuthenticated">
               <NuxtLink
                 to="/dashboard"
                 class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-500"
