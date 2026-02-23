@@ -4,6 +4,7 @@ import type { H3Event } from 'h3'
 import { prisma } from './db'
 
 const SESSION_COOKIE_NAME = 'logify_session'
+const LOGGED_IN_FLAG = 'logify_logged_in'
 const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 // ---------------------------------------------------------------------------
@@ -140,7 +141,15 @@ export function setSessionCookie(event: H3Event, token: string): void {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: SESSION_MAX_AGE_MS / 1000, // seconds
+    maxAge: SESSION_MAX_AGE_MS / 1000,
+    path: '/',
+  })
+  // Non-httpOnly flag so client JS can detect login state without an API call
+  setCookie(event, LOGGED_IN_FLAG, '1', {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: SESSION_MAX_AGE_MS / 1000,
     path: '/',
   })
 }
@@ -148,6 +157,12 @@ export function setSessionCookie(event: H3Event, token: string): void {
 export function clearSessionCookie(event: H3Event): void {
   deleteCookie(event, SESSION_COOKIE_NAME, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+  })
+  deleteCookie(event, LOGGED_IN_FLAG, {
+    httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',

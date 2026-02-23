@@ -35,6 +35,7 @@ export function useAuth() {
     }
     finally {
       authState.value.user = null
+      useCookie('logify_logged_in').value = null
       await useRouter().push('/login')
     }
   }
