@@ -54,6 +54,11 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: 'vercel',
+    vercel: {
+      functions: {
+        maxDuration: 60,
+      },
+    },
   },
 
   routeRules: {

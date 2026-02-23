@@ -1,34 +1,13 @@
+// NOTE: On Vercel serverless, this in-memory store only persists within a
+// single warm function instance. It provides basic burst protection but won't
+// prevent distributed abuse across cold starts. Acceptable for free tier.
+
 interface RateLimitEntry {
   count: number
   resetAt: number
 }
 
 const store = new Map<string, RateLimitEntry>()
-
-// Clean up expired entries every 60 seconds
-const CLEANUP_INTERVAL_MS = 60_000
-
-let cleanupTimer: ReturnType<typeof setInterval> | null = null
-
-function startCleanup(): void {
-  if (cleanupTimer) return
-
-  cleanupTimer = setInterval(() => {
-    const now = Date.now()
-    for (const [key, entry] of store) {
-      if (entry.resetAt <= now) {
-        store.delete(key)
-      }
-    }
-  }, CLEANUP_INTERVAL_MS)
-
-  // Allow the process to exit without waiting for the timer
-  if (cleanupTimer && typeof cleanupTimer === 'object' && 'unref' in cleanupTimer) {
-    cleanupTimer.unref()
-  }
-}
-
-startCleanup()
 
 export interface RateLimitResult {
   allowed: boolean
