@@ -4,8 +4,6 @@ import { prisma } from '../../../utils/db'
 import {
   createSession,
   setSessionCookie,
-  generateApiKey,
-  hashApiKey,
 } from '../../../utils/auth'
 
 export default defineEventHandler(async (event) => {
@@ -66,7 +64,7 @@ export default defineEventHandler(async (event) => {
       })
     }
     else {
-      // New user — create user + default project + API key
+      // New user — create user + default project
       const now = new Date()
       const userId = nanoid()
       const projectId = nanoid()
@@ -89,21 +87,6 @@ export default defineEventHandler(async (event) => {
           id: projectId,
           userId,
           name: 'My Project',
-          createdAt: now,
-        },
-      })
-
-      const { key, prefix } = generateApiKey()
-      const keyHash = hashApiKey(key)
-
-      await prisma.apiKey.create({
-        data: {
-          id: nanoid(),
-          projectId,
-          userId,
-          name: 'Default',
-          keyHash,
-          keyPrefix: prefix,
           createdAt: now,
         },
       })
