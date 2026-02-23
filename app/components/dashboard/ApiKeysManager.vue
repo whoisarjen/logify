@@ -22,6 +22,8 @@ const generatedKey = ref<string | null>(null)
 const keyCopied = ref(false)
 const generating = ref(false)
 const revoking = ref<string | null>(null)
+const generateError = ref<string | null>(null)
+const revokeError = ref<string | null>(null)
 
 async function fetchKeys() {
   loading.value = true
@@ -49,6 +51,7 @@ function openGenerateModal() {
   newKeyProjectId.value = selected.value?.id || ''
   generatedKey.value = null
   keyCopied.value = false
+  generateError.value = null
   showGenerateModal.value = true
 }
 
@@ -82,8 +85,8 @@ async function generateKey() {
       revokedAt: null,
       isActive: true,
     })
-  } catch {
-    // Handle error silently
+  } catch (err: any) {
+    generateError.value = err?.data?.message || err?.message || 'Failed to generate API key. Please try again.'
   } finally {
     generating.value = false
   }
@@ -118,8 +121,9 @@ async function revokeKey(id: string) {
       key.isActive = false
       key.revokedAt = new Date().toISOString()
     }
-  } catch {
-    // Handle error silently
+  } catch (err: any) {
+    revokeError.value = err?.data?.message || err?.message || 'Failed to revoke API key. Please try again.'
+    setTimeout(() => { revokeError.value = null }, 4000)
   } finally {
     revoking.value = null
   }
@@ -165,6 +169,17 @@ function relativeTime(dateStr: string | null): string {
         </svg>
         Generate New Key
       </button>
+    </div>
+
+    <!-- Revoke error -->
+    <div
+      v-if="revokeError"
+      class="flex items-center gap-2 p-3 mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+      </svg>
+      {{ revokeError }}
     </div>
 
     <!-- Loading skeleton -->
@@ -326,6 +341,15 @@ function relativeTime(dateStr: string | null): string {
               <div class="px-6 py-5">
                 <!-- Before generation -->
                 <div v-if="!generatedKey" class="space-y-4">
+                  <div
+                    v-if="generateError"
+                    class="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                    </svg>
+                    {{ generateError }}
+                  </div>
                   <div>
                     <label class="block text-sm font-medium text-surface-300 mb-1.5">Key Name</label>
                     <input

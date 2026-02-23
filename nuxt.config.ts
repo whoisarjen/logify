@@ -1,12 +1,8 @@
-import dotenv from 'dotenv'
 import tailwindcss from '@tailwindcss/vite'
-
-dotenv.config({ path: '.env.local' })
-dotenv.config({ path: '.env' })
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV !== 'production' },
 
   app: {
     head: {
@@ -56,7 +52,9 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
   },
 
-  nitro: {},
+  nitro: {
+    preset: 'vercel',
+  },
 
   routeRules: {
     '/register': { redirect: '/login' },
@@ -66,6 +64,13 @@ export default defineNuxtConfig({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
+      },
+    },
+    '/**': {
+      headers: {
+        'X-Frame-Options': 'DENY',
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
       },
     },
   },
