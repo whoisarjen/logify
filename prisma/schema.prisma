@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id
+  email        String   @unique
+  name         String
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @map("updated_at") @db.Timestamptz
+
+  sessions Session[]
+  projects Project[]
+  apiKeys  ApiKey[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  createdAt DateTime @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([token])
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Project {
+  id        String   @id
+  userId    String   @map("user_id")
+  name      String
+  createdAt DateTime @map("created_at") @db.Timestamptz
+
+  user    User     @relation(fields: [userId], references: [id])
+  apiKeys ApiKey[]
+  logs    Log[]
+
+  @@index([userId])
+  @@map("projects")
+}
+
+model ApiKey {
+  id         String    @id
+  projectId  String    @map("project_id")
+  userId     String    @map("user_id")
+  name       String
+  keyHash    String    @map("key_hash")
+  keyPrefix  String    @map("key_prefix") @db.VarChar(20)
+  lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz
+  createdAt  DateTime  @map("created_at") @db.Timestamptz
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz
+
+  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([keyHash])
+  @@index([userId])
+  @@map("api_keys")
+}
+
+model Log {
+  id          String   @id
+  projectId   String   @map("project_id")
+  level       String   @db.VarChar(10)
+  message     String
+  service     String?
+  environment String?
+  timestamp   DateTime @db.Timestamptz
+  meta        Json?
+  traceId     String?  @map("trace_id")
+  spanId      String?  @map("span_id")
+  userIdField String?  @map("user_id_field")
+  requestId   String?  @map("request_id")
+  host        String?
+  tags        Json?
+  ip          String?
+  createdAt   DateTime @map("created_at") @db.Timestamptz
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([projectId, timestamp(sort: Desc)])
+  @@index([projectId, level])
+  @@index([projectId, service])
+  @@index([traceId])
+  @@index([requestId])
+  @@map("logs")
+}

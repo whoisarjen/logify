@@ -4,21 +4,39 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "nuxt dev --dotenv .env.local",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "prisma generate && nuxt prepare",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run tests/unit",
+    "test:api": "vitest run tests/api"
   },
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.93",
-    "@iconify-json/simple-icons": "^1.2.71",
     "@nuxtjs/color-mode": "^4.0.0",
     "@nuxtjs/google-fonts": "^3.2.0",
-    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@prisma/adapter-neon": "^7.4.1",
+    "@prisma/client": "^7.4.1",
+    "@tailwindcss/vite": "^4.2.0",
     "@vueuse/nuxt": "^14.2.1",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.3.1",
+    "nanoid": "^5.1.6",
     "nuxt": "^4.3.1",
-    "nuxt-icon": "^1.0.0-beta.7",
+    "tailwindcss": "^4.2.0",
     "vue": "^3.5.28",
     "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@nuxt/test-utils": "^4.0.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^25.3.0",
+    "prisma": "^7.4.1",
+    "vitest": "^4.0.18"
   }
 }

@@ -65,6 +65,10 @@ coverage
 .vercel
 .netlify
 
+# Prisma
+generated/
+
 # Misc
 *.pem
 .eslintcache
+.env*.local
