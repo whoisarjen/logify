@@ -27,7 +27,7 @@ const logEntries = computed<LogEntry[]>(() => [
     timestamp: recentTimestamp(4),
     level: 'warn',
     service: 'api-gateway',
-    message: 'Rate limit approaching for key lgfy_prod_8f3k (82/100 requests)',
+    message: 'Rate limit approaching for key lgfy_prod_8f3k (438/500 daily requests)',
   },
   {
     timestamp: recentTimestamp(6),

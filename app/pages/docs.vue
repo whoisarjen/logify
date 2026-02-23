@@ -626,13 +626,13 @@ onMounted(() => {
                 <tbody>
                   <tr class="border-b border-surface-800/50">
                     <td class="py-3 px-4 text-surface-300 font-medium">Free</td>
-                    <td class="py-3 px-4 text-surface-400">100 req/min</td>
-                    <td class="py-3 px-4 text-surface-400">20 req/sec</td>
+                    <td class="py-3 px-4 text-surface-400">500 req/day</td>
+                    <td class="py-3 px-4 text-surface-400">10 req/sec</td>
                     <td class="py-3 px-4 text-surface-400 hidden sm:table-cell">10,000 logs</td>
                   </tr>
                   <tr class="border-b border-surface-800/50">
                     <td class="py-3 px-4 text-surface-300 font-medium">Pro</td>
-                    <td class="py-3 px-4 text-surface-400">1,000 req/min</td>
+                    <td class="py-3 px-4 text-surface-400">50,000 req/day</td>
                     <td class="py-3 px-4 text-surface-400">100 req/sec</td>
                     <td class="py-3 px-4 text-surface-400 hidden sm:table-cell">1,000,000 logs</td>
                   </tr>
@@ -651,9 +651,9 @@ onMounted(() => {
               Every API response includes rate limit information in the headers:
             </p>
             <div class="code-block p-4 overflow-x-auto mb-8">
-              <pre class="text-surface-300">X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 87
-X-RateLimit-Reset: 1708700400</pre>
+              <pre class="text-surface-300">X-RateLimit-Limit: 500
+X-RateLimit-Remaining: 438
+X-RateLimit-Reset: 1708732800</pre>
             </div>
 
             <h3 class="text-lg font-semibold text-surface-200 mb-3">Handling rate limits</h3>

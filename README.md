@@ -135,10 +135,10 @@ POST /api/v1/logs
 
 ### Rate Limits
 
-| Tier | Requests/min | Monthly Logs |
+| Tier | Requests/day | Monthly Logs |
 |------|-------------|-------------|
-| Free | 100 | 10,000 |
-| Pro | 1,000 | 1,000,000 |
+| Free | 500 | 10,000 |
+| Pro | 50,000 | 1,000,000 |
 | Enterprise | Custom | Unlimited |
 
 ## Tech Stack

@@ -6,8 +6,8 @@ import { FREE_TIER, getMonthlyLogCount } from '../../utils/free-tier'
 
 const VALID_LEVELS = ['debug', 'info', 'warn', 'error', 'fatal'] as const
 
-const RATE_LIMIT = 100 // requests
-const RATE_WINDOW_MS = 60_000 // 1 minute
+const RATE_LIMIT = 500 // requests
+const RATE_WINDOW_MS = 86_400_000 // 24 hours
 
 export default defineEventHandler(async (event) => {
   // ---------------------------------------------------------------------------
