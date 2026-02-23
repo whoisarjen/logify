@@ -1,5 +1,11 @@
 <script setup lang="ts">
-const { isAuthenticated } = useAuth()
+const { isAuthenticated, fetchUser } = useAuth()
+
+// Fetch auth state so the navbar can show Dashboard vs Sign In
+if (!isAuthenticated.value) {
+  await fetchUser()
+}
+
 const mobileMenuOpen = ref(false)
 
 const navLinks = [
