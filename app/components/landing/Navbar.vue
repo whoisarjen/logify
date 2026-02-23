@@ -1,8 +1,10 @@
 <script setup lang="ts">
 const { isAuthenticated, fetchUser } = useAuth()
 
-// Fetch auth state so the navbar can show Dashboard vs Sign In
-if (!isAuthenticated.value) {
+// Check session cookie to decide Dashboard vs Sign In.
+// Only call the API if cookie exists (avoids useless requests for guests).
+const sessionCookie = useCookie('logify_session')
+if (sessionCookie.value && !isAuthenticated.value) {
   await fetchUser()
 }
 
