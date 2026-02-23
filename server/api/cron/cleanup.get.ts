@@ -1,5 +1,6 @@
 import { prisma } from '../../utils/db'
 import { FREE_TIER } from '../../utils/free-tier'
+import { cleanupRateLimits } from '../../utils/rate-limit'
 
 const BATCH_SIZE = 5000
 
@@ -44,9 +45,12 @@ export default defineEventHandler(async (event) => {
     where: { expiresAt: { lt: new Date() } },
   })
 
+  const deletedRateLimits = await cleanupRateLimits()
+
   return {
     success: true,
     deletedLogs: totalDeletedLogs,
     deletedSessions: deletedSessions.count,
+    deletedRateLimits,
   }
 })

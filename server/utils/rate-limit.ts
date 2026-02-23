@@ -1,13 +1,4 @@
-// NOTE: On Vercel serverless, this in-memory store only persists within a
-// single warm function instance. It provides basic burst protection but won't
-// prevent distributed abuse across cold starts. Acceptable for free tier.
-
-interface RateLimitEntry {
-  count: number
-  resetAt: number
-}
-
-const store = new Map<string, RateLimitEntry>()
+import { prisma } from './db'
 
 export interface RateLimitResult {
   allowed: boolean
@@ -16,33 +7,48 @@ export interface RateLimitResult {
 }
 
 /**
- * Check whether a request from `identifier` is allowed under the given limits.
+ * Check and increment the rate limit counter for `identifier`.
  *
- * @param identifier  Unique key (e.g. IP address, API key hash)
- * @param limit       Maximum number of requests in the window
- * @param windowMs    Window duration in milliseconds
+ * Uses a fixed-window algorithm backed by PostgreSQL. The check+increment
+ * is performed in a single atomic INSERT ... ON CONFLICT DO UPDATE query
+ * so there are no race conditions across serverless invocations.
  */
-export function checkRateLimit(
+export async function checkRateLimit(
   identifier: string,
   limit: number,
   windowMs: number,
-): RateLimitResult {
+): Promise<RateLimitResult> {
   const now = Date.now()
-  const entry = store.get(identifier)
+  const windowStartMs = Math.floor(now / windowMs) * windowMs
+  const windowStart = new Date(windowStartMs)
+  const resetAt = windowStartMs + windowMs
 
-  // First request or window expired -> reset
-  if (!entry || entry.resetAt <= now) {
-    const resetAt = now + windowMs
-    store.set(identifier, { count: 1, resetAt })
-    return { allowed: true, remaining: limit - 1, resetAt }
-  }
+  const result = await prisma.$queryRaw<Array<{ count: number }>>`
+    INSERT INTO rate_limits (identifier, count, window_start)
+    VALUES (${identifier}, 1, ${windowStart})
+    ON CONFLICT (identifier) DO UPDATE SET
+      count = CASE
+        WHEN rate_limits.window_start = ${windowStart}
+        THEN rate_limits.count + 1
+        ELSE 1
+      END,
+      window_start = ${windowStart}
+    RETURNING count
+  `
 
-  // Within window
-  if (entry.count < limit) {
-    entry.count++
-    return { allowed: true, remaining: limit - entry.count, resetAt: entry.resetAt }
-  }
+  const count = result[0].count
+  const allowed = count <= limit
+  const remaining = Math.max(0, limit - count)
 
-  // Over limit
-  return { allowed: false, remaining: 0, resetAt: entry.resetAt }
+  return { allowed, remaining, resetAt }
+}
+
+/**
+ * Remove stale rate limit entries older than maxAgeMs.
+ */
+export async function cleanupRateLimits(maxAgeMs: number = 5 * 60 * 1000): Promise<number> {
+  const cutoff = new Date(Date.now() - maxAgeMs)
+  return prisma.$executeRaw`
+    DELETE FROM rate_limits WHERE window_start < ${cutoff}
+  `
 }

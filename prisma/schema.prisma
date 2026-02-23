@@ -99,3 +99,12 @@ model Log {
   @@index([requestId])
   @@map("logs")
 }
+
+model RateLimit {
+  identifier  String   @id @db.VarChar(255)
+  count       Int      @default(0)
+  windowStart DateTime @map("window_start") @db.Timestamptz
+
+  @@index([windowStart])
+  @@map("rate_limits")
+}

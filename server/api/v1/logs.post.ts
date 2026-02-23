@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
   // ---------------------------------------------------------------------------
   // 2. Rate limiting (per API key)
   // ---------------------------------------------------------------------------
-  const rateLimitResult = checkRateLimit(`apikey:${keyInfo.keyId}`, RATE_LIMIT, RATE_WINDOW_MS)
+  const rateLimitResult = await checkRateLimit(`apikey:${keyInfo.keyId}`, RATE_LIMIT, RATE_WINDOW_MS)
 
   setHeader(event, 'X-RateLimit-Limit', String(RATE_LIMIT))
   setHeader(event, 'X-RateLimit-Remaining', String(rateLimitResult.remaining))
