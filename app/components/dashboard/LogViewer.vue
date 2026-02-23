@@ -136,7 +136,7 @@ watch(isLive, (live) => {
     liveInterval = setInterval(() => {
       fetchLogs()
       fetchLevelCounts()
-    }, 5000)
+    }, 10000)
   } else if (liveInterval) {
     clearInterval(liveInterval)
     liveInterval = null

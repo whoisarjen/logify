@@ -126,7 +126,7 @@ const selectStyle = {
             class="h-2 w-2 rounded-full"
             :class="isLive ? 'bg-success animate-pulse-dot' : 'bg-surface-600'"
           />
-          Live
+          {{ isLive ? 'Live · 10s' : 'Live' }}
         </button>
       </div>
     </div>
