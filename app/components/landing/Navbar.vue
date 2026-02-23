@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { isAuthenticated } = useAuth()
 const mobileMenuOpen = ref(false)
 
 const navLinks = [
@@ -72,21 +73,34 @@ function closeMobileMenu() {
 
         <!-- Desktop CTA -->
         <div class="hidden md:flex md:items-center md:gap-3">
-          <NuxtLink
-            to="/login"
-            class="px-3 py-1.5 text-sm text-surface-400 transition-colors hover:text-surface-200"
-          >
-            Sign In
-          </NuxtLink>
-          <NuxtLink
-            to="/login"
-            class="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-4 py-1.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-500 active:scale-[0.97]"
-          >
-            Get Started
-            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-            </svg>
-          </NuxtLink>
+          <template v-if="isAuthenticated">
+            <NuxtLink
+              to="/dashboard"
+              class="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-4 py-1.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-500 active:scale-[0.97]"
+            >
+              Dashboard
+              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </NuxtLink>
+          </template>
+          <template v-else>
+            <NuxtLink
+              to="/login"
+              class="px-3 py-1.5 text-sm text-surface-400 transition-colors hover:text-surface-200"
+            >
+              Sign In
+            </NuxtLink>
+            <NuxtLink
+              to="/login"
+              class="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-4 py-1.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-500 active:scale-[0.97]"
+            >
+              Get Started
+              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </NuxtLink>
+          </template>
         </div>
 
         <!-- Mobile Hamburger -->
@@ -159,23 +173,37 @@ function closeMobileMenu() {
           </template>
 
           <div class="mt-2 flex flex-col gap-2 border-t border-surface-800/50 pt-3">
-            <NuxtLink
-              to="/login"
-              class="flex w-full items-center justify-center rounded-lg border border-surface-700 px-4 py-2.5 text-sm text-surface-300 transition-colors hover:border-surface-600 hover:text-surface-200"
-              @click="closeMobileMenu"
-            >
-              Sign In
-            </NuxtLink>
-            <NuxtLink
-              to="/login"
-              class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-500"
-              @click="closeMobileMenu"
-            >
-              Get Started
-              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </NuxtLink>
+            <template v-if="isAuthenticated">
+              <NuxtLink
+                to="/dashboard"
+                class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-500"
+                @click="closeMobileMenu"
+              >
+                Dashboard
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </NuxtLink>
+            </template>
+            <template v-else>
+              <NuxtLink
+                to="/login"
+                class="flex w-full items-center justify-center rounded-lg border border-surface-700 px-4 py-2.5 text-sm text-surface-300 transition-colors hover:border-surface-600 hover:text-surface-200"
+                @click="closeMobileMenu"
+              >
+                Sign In
+              </NuxtLink>
+              <NuxtLink
+                to="/login"
+                class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-500"
+                @click="closeMobileMenu"
+              >
+                Get Started
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </NuxtLink>
+            </template>
           </div>
         </div>
       </div>
