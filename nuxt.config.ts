@@ -60,7 +60,7 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/register': { redirect: '/login' },
-    '/api/**': {
+    '/api/v1/**': {
       cors: true,
       headers: {
         'Access-Control-Allow-Origin': '*',

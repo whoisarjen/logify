@@ -11,21 +11,18 @@ interface AuthState {
   error: string | null
 }
 
-const authState = reactive<AuthState>({
-  user: null,
-  loading: false,
-  error: null,
-})
-
 export function useAuth() {
-  const router = useRouter()
-  const route = useRoute()
+  const authState = useState<AuthState>('auth', () => ({
+    user: null,
+    loading: false,
+    error: null,
+  }))
 
-  const isAuthenticated = computed(() => !!authState.user)
+  const isAuthenticated = computed(() => !!authState.value.user)
 
   function signIn() {
-    authState.loading = true
-    authState.error = null
+    authState.value.loading = true
+    authState.value.error = null
     window.location.href = '/api/auth/google'
   }
 
@@ -37,23 +34,24 @@ export function useAuth() {
       // Ignore logout errors
     }
     finally {
-      authState.user = null
-      await router.push('/login')
+      authState.value.user = null
+      await useRouter().push('/login')
     }
   }
 
   async function fetchUser() {
     try {
-      const data = await $fetch<{ user: User }>('/api/auth/me')
-      authState.user = data.user
+      const headers = import.meta.server ? useRequestHeaders(['cookie']) : {}
+      const data = await $fetch<{ user: User }>('/api/auth/me', { headers })
+      authState.value.user = data.user
     }
     catch {
-      authState.user = null
+      authState.value.user = null
     }
   }
 
   function checkOAuthError() {
-    const error = route.query.error as string | undefined
+    const error = useRoute().query.error as string | undefined
     if (error) {
       const messages: Record<string, string> = {
         access_denied: 'Sign-in was cancelled.',
@@ -61,18 +59,18 @@ export function useAuth() {
         invalid_state: 'Sign-in session expired. Please try again.',
         missing_params: 'Something went wrong. Please try again.',
       }
-      authState.error = messages[error] || 'An unexpected error occurred.'
+      authState.value.error = messages[error] || 'An unexpected error occurred.'
     }
   }
 
   function clearError() {
-    authState.error = null
+    authState.value.error = null
   }
 
   return {
-    user: computed(() => authState.user),
-    loading: computed(() => authState.loading),
-    error: computed(() => authState.error),
+    user: computed(() => authState.value.user),
+    loading: computed(() => authState.value.loading),
+    error: computed(() => authState.value.error),
     isAuthenticated,
     signIn,
     logout,

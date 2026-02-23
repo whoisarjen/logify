@@ -2,6 +2,7 @@ import { nanoid } from 'nanoid'
 import { validateApiKey } from '../../utils/auth'
 import { checkRateLimit } from '../../utils/rate-limit'
 import { prisma } from '../../utils/db'
+import { FREE_TIER, getMonthlyLogCount } from '../../utils/free-tier'
 
 const VALID_LEVELS = ['debug', 'info', 'warn', 'error', 'fatal'] as const
 
@@ -50,7 +51,23 @@ export default defineEventHandler(async (event) => {
   }
 
   // ---------------------------------------------------------------------------
-  // 3. Parse and validate request body
+  // 3. Free tier log limit
+  // ---------------------------------------------------------------------------
+  const monthlyCount = await getMonthlyLogCount(keyInfo.projectId)
+
+  setHeader(event, 'X-Logify-Monthly-Limit', String(FREE_TIER.MONTHLY_LOG_LIMIT))
+  setHeader(event, 'X-Logify-Monthly-Used', String(monthlyCount))
+
+  if (monthlyCount >= FREE_TIER.MONTHLY_LOG_LIMIT) {
+    throw createError({
+      statusCode: 429,
+      statusMessage: 'Too Many Requests',
+      message: `Monthly log limit reached (${FREE_TIER.MONTHLY_LOG_LIMIT.toLocaleString()}). Upgrade your plan for higher limits.`,
+    })
+  }
+
+  // ---------------------------------------------------------------------------
+  // 4. Parse and validate request body
   // ---------------------------------------------------------------------------
   const body = await readBody(event)
 
@@ -131,7 +148,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // ---------------------------------------------------------------------------
-  // 4. Insert log entry
+  // 5. Insert log entry
   // ---------------------------------------------------------------------------
   const logId = nanoid()
   const now = new Date()

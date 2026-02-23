@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { selected } = useProject()
+const { searchQuery, timeRange, environment, isLive, refreshTrigger, timeRangeToDate } = useLogFilters()
 
 interface LogEntry {
   id: string
@@ -68,6 +69,20 @@ async function fetchLogs() {
       query.level = activeLevel.value
     }
 
+    // Apply composable filters
+    const fromDate = timeRangeToDate(timeRange.value)
+    if (fromDate) {
+      query.from = fromDate.toISOString()
+    }
+
+    if (environment.value !== 'all') {
+      query.environment = environment.value
+    }
+
+    if (searchQuery.value) {
+      query.search = searchQuery.value
+    }
+
     const data = await $fetch<LogsResponse>('/api/logs', { query })
     logs.value = data.logs
     pagination.value = data.pagination
@@ -105,6 +120,33 @@ watch([activeLevel], () => {
 
 watch(currentPage, () => {
   fetchLogs()
+})
+
+watch([searchQuery, timeRange, environment, refreshTrigger], () => {
+  currentPage.value = 1
+  fetchLogs()
+  fetchLevelCounts()
+})
+
+// Live polling
+let liveInterval: ReturnType<typeof setInterval> | null = null
+
+watch(isLive, (live) => {
+  if (live) {
+    liveInterval = setInterval(() => {
+      fetchLogs()
+      fetchLevelCounts()
+    }, 5000)
+  } else if (liveInterval) {
+    clearInterval(liveInterval)
+    liveInterval = null
+  }
+})
+
+onUnmounted(() => {
+  if (liveInterval) {
+    clearInterval(liveInterval)
+  }
 })
 
 const totalPages = computed(() => Math.max(1, Math.ceil(pagination.value.total / perPage)))

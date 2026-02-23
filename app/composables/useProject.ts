@@ -4,42 +4,45 @@ interface Project {
   createdAt: string
 }
 
-const projectState = reactive<{
+interface ProjectState {
   projects: Project[]
   selected: Project | null
   loading: boolean
-}>({
-  projects: [],
-  selected: null,
-  loading: false,
-})
+}
 
 export function useProject() {
-  async function fetchProjects() {
-    if (projectState.projects.length > 0) return
+  const projectState = useState<ProjectState>('projects', () => ({
+    projects: [],
+    selected: null,
+    loading: false,
+  }))
 
-    projectState.loading = true
+  async function fetchProjects() {
+    if (projectState.value.projects.length > 0) return
+
+    projectState.value.loading = true
     try {
-      const data = await $fetch<{ projects: Project[] }>('/api/projects')
-      projectState.projects = data.projects
-      if (data.projects.length > 0 && !projectState.selected) {
-        projectState.selected = data.projects[0]
+      const headers = import.meta.server ? useRequestHeaders(['cookie']) : {}
+      const data = await $fetch<{ projects: Project[] }>('/api/projects', { headers })
+      projectState.value.projects = data.projects
+      if (data.projects.length > 0 && !projectState.value.selected) {
+        projectState.value.selected = data.projects[0]
       }
     } catch {
-      projectState.projects = []
+      projectState.value.projects = []
     } finally {
-      projectState.loading = false
+      projectState.value.loading = false
     }
   }
 
   function selectProject(project: Project) {
-    projectState.selected = project
+    projectState.value.selected = project
   }
 
   return {
-    projects: computed(() => projectState.projects),
-    selected: computed(() => projectState.selected),
-    loading: computed(() => projectState.loading),
+    projects: computed(() => projectState.value.projects),
+    selected: computed(() => projectState.value.selected),
+    loading: computed(() => projectState.value.loading),
     fetchProjects,
     selectProject,
   }

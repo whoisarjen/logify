@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { selected } = useProject()
+const { refreshTrigger } = useLogFilters()
 
 interface StatsResponse {
   total: number
@@ -30,6 +31,10 @@ async function fetchStats() {
 watch(selected, () => {
   fetchStats()
 }, { immediate: true })
+
+watch(refreshTrigger, () => {
+  fetchStats()
+})
 
 const totalLogs = computed(() => stats.value?.total ?? 0)
 const errorCount = computed(() => (stats.value?.byLevel?.error ?? 0) + (stats.value?.byLevel?.fatal ?? 0))

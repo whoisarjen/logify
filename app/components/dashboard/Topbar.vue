@@ -1,12 +1,9 @@
 <script setup lang="ts">
 const emit = defineEmits<{
   toggleSidebar: []
-  refresh: []
-  search: [query: string]
 }>()
 
-const searchQuery = ref('')
-const isLive = ref(false)
+const { searchQuery, timeRange, environment, isLive, refresh } = useLogFilters()
 
 const timeRanges = [
   { label: '15m', value: '15m' },
@@ -24,15 +21,12 @@ const environments = [
   { label: 'Development', value: 'development' },
 ]
 
-const selectedTimeRange = ref('24h')
-const selectedEnvironment = ref('all')
-
 function onSearch() {
-  emit('search', searchQuery.value)
+  refresh()
 }
 
 function onRefresh() {
-  emit('refresh')
+  refresh()
 }
 
 function toggleLive() {
@@ -83,11 +77,11 @@ const selectStyle = {
             :key="range.value"
             class="px-2.5 py-1.5 text-xs font-medium transition-colors"
             :class="
-              selectedTimeRange === range.value
+              timeRange === range.value
                 ? 'bg-primary-500/15 text-primary-400'
                 : 'text-surface-400 hover:text-surface-200 hover:bg-surface-700/50'
             "
-            @click="selectedTimeRange = range.value"
+            @click="timeRange = range.value"
           >
             {{ range.label }}
           </button>
@@ -95,7 +89,7 @@ const selectStyle = {
 
         <!-- Environment -->
         <select
-          v-model="selectedEnvironment"
+          v-model="environment"
           class="h-9 px-3 rounded-lg border border-surface-700 bg-surface-800/50 text-xs font-medium text-surface-300 focus:outline-none focus:border-primary-500/50 cursor-pointer appearance-none pr-8"
           :style="selectStyle"
         >

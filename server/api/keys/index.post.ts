@@ -1,6 +1,7 @@
 import { nanoid } from 'nanoid'
 import { prisma } from '../../utils/db'
 import { requireAuth, generateApiKey, hashApiKey } from '../../utils/auth'
+import { FREE_TIER, getActiveApiKeyCount } from '../../utils/free-tier'
 
 export default defineEventHandler(async (event) => {
   const user = await requireAuth(event)
@@ -62,6 +63,20 @@ export default defineEventHandler(async (event) => {
       statusCode: 404,
       statusMessage: 'Not Found',
       message: 'Project not found or you do not have access.',
+    })
+  }
+
+  // ---------------------------------------------------------------------------
+  // Check free tier API key limit
+  // ---------------------------------------------------------------------------
+
+  const activeKeyCount = await getActiveApiKeyCount(user.id)
+
+  if (activeKeyCount >= FREE_TIER.MAX_API_KEYS) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Forbidden',
+      message: `Free tier allows ${FREE_TIER.MAX_API_KEYS} active API key${FREE_TIER.MAX_API_KEYS > 1 ? 's' : ''}. Revoke an existing key or upgrade your plan.`,
     })
   }
 
