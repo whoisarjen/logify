@@ -16,8 +16,6 @@ vi.mock('../../server/utils/db', () => ({
 }))
 
 import {
-  hashPassword,
-  verifyPassword,
   generateSessionToken,
   generateApiKey,
   hashApiKey,
@@ -27,57 +25,6 @@ import {
 import { prisma } from '../../server/utils/db'
 
 const mockPrisma = vi.mocked(prisma)
-
-describe('Password hashing', () => {
-  it('should hash a password and return a bcrypt hash string', async () => {
-    const password = 'mysecurepassword123'
-    const hashed = await hashPassword(password)
-
-    expect(hashed).toBeDefined()
-    expect(typeof hashed).toBe('string')
-    // bcrypt hashes start with $2a$ or $2b$
-    expect(hashed).toMatch(/^\$2[ab]\$/)
-  })
-
-  it('should produce different hashes for the same password (due to salting)', async () => {
-    const password = 'samepassword'
-    const hash1 = await hashPassword(password)
-    const hash2 = await hashPassword(password)
-
-    expect(hash1).not.toBe(hash2)
-  })
-
-  it('should verify a correct password against its hash', async () => {
-    const password = 'testpassword'
-    const hashed = await hashPassword(password)
-
-    const result = await verifyPassword(password, hashed)
-    expect(result).toBe(true)
-  })
-
-  it('should reject an incorrect password', async () => {
-    const password = 'correctpassword'
-    const hashed = await hashPassword(password)
-
-    const result = await verifyPassword('wrongpassword', hashed)
-    expect(result).toBe(false)
-  })
-
-  it('should reject an empty password against a valid hash', async () => {
-    const hashed = await hashPassword('realpassword')
-
-    const result = await verifyPassword('', hashed)
-    expect(result).toBe(false)
-  })
-
-  it('should handle unicode passwords', async () => {
-    const password = 'p@ssw0rd!@#$%^'
-    const hashed = await hashPassword(password)
-
-    const result = await verifyPassword(password, hashed)
-    expect(result).toBe(true)
-  })
-})
 
 describe('Session token generation', () => {
   it('should generate a string token', () => {

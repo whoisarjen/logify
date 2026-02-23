@@ -59,6 +59,7 @@ export default defineNuxtConfig({
   nitro: {},
 
   routeRules: {
+    '/register': { redirect: '/login' },
     '/api/**': {
       cors: true,
       headers: {

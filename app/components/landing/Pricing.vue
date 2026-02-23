@@ -11,6 +11,7 @@ interface PricingTier {
   features: PricingFeature[]
   highlighted: boolean
   cta: string
+  available: boolean
 }
 
 const tiers: PricingTier[] = [
@@ -27,7 +28,8 @@ const tiers: PricingTier[] = [
       { text: '1 API key' },
     ],
     highlighted: false,
-    cta: 'Coming Soon',
+    cta: 'Get Started Free',
+    available: true,
   },
   {
     name: 'Pro',
@@ -44,6 +46,7 @@ const tiers: PricingTier[] = [
     ],
     highlighted: true,
     cta: 'Coming Soon',
+    available: false,
   },
   {
     name: 'Enterprise',
@@ -61,6 +64,7 @@ const tiers: PricingTier[] = [
     ],
     highlighted: false,
     cta: 'Coming Soon',
+    available: false,
   },
 ]
 
@@ -156,7 +160,23 @@ const sectionRef = useReveal()
             </ul>
 
             <!-- CTA button -->
+            <NuxtLink
+              v-if="tier.available"
+              to="/login"
+              class="flex w-full items-center justify-center gap-2 rounded-xl border px-6 py-3 text-sm font-semibold transition-all duration-200"
+              :class="[
+                tier.highlighted
+                  ? 'border-primary-500 bg-primary-600 text-white shadow-lg shadow-primary-600/25 hover:bg-primary-500'
+                  : 'border-primary-500/30 bg-primary-500/10 text-primary-400 hover:bg-primary-500/20',
+              ]"
+            >
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+              {{ tier.cta }}
+            </NuxtLink>
             <button
+              v-else
               disabled
               class="w-full cursor-not-allowed rounded-xl border px-6 py-3 text-sm font-semibold transition-all duration-200"
               :class="[

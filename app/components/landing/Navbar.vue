@@ -79,7 +79,7 @@ function closeMobileMenu() {
             Sign In
           </NuxtLink>
           <NuxtLink
-            to="/register"
+            to="/login"
             class="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-4 py-1.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-500 active:scale-[0.97]"
           >
             Get Started
@@ -167,7 +167,7 @@ function closeMobileMenu() {
               Sign In
             </NuxtLink>
             <NuxtLink
-              to="/register"
+              to="/login"
               class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-500"
               @click="closeMobileMenu"
             >

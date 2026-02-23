@@ -76,7 +76,7 @@ onMounted(() => {
           style="animation-delay: 0.3s"
         >
           <NuxtLink
-            to="/register"
+            to="/login"
             class="group inline-flex items-center gap-2 rounded-xl bg-primary-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-primary-600/25 transition-all duration-200 hover:bg-primary-500 hover:shadow-primary-500/30 hover:-translate-y-0.5 active:translate-y-0 sm:text-base"
           >
             Get Started Free

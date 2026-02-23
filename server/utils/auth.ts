@@ -1,24 +1,10 @@
-import { hash, compare } from 'bcryptjs'
 import { nanoid } from 'nanoid'
 import { createHash } from 'crypto'
 import type { H3Event } from 'h3'
 import { prisma } from './db'
 
-const BCRYPT_ROUNDS = 12
 const SESSION_COOKIE_NAME = 'logify_session'
 const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
-
-// ---------------------------------------------------------------------------
-// Password hashing
-// ---------------------------------------------------------------------------
-
-export async function hashPassword(password: string): Promise<string> {
-  return hash(password, BCRYPT_ROUNDS)
-}
-
-export async function verifyPassword(password: string, passwordHash: string): Promise<boolean> {
-  return compare(password, passwordHash)
-}
 
 // ---------------------------------------------------------------------------
 // Session tokens
@@ -113,6 +99,7 @@ export async function getSessionUser(event: H3Event): Promise<{
   id: string
   email: string
   name: string
+  avatar: string | null
   createdAt: Date
   updatedAt: Date
 } | null> {
@@ -142,6 +129,7 @@ export async function getSessionUser(event: H3Event): Promise<{
     id: session.user.id,
     email: session.user.email,
     name: session.user.name,
+    avatar: session.user.avatar,
     createdAt: session.user.createdAt,
     updatedAt: session.user.updatedAt,
   }

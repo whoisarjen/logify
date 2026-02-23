@@ -2,7 +2,7 @@ interface User {
   id: string
   name: string
   email: string
-  avatar?: string
+  avatar?: string | null
 }
 
 interface AuthState {
@@ -19,51 +19,14 @@ const authState = reactive<AuthState>({
 
 export function useAuth() {
   const router = useRouter()
+  const route = useRoute()
 
   const isAuthenticated = computed(() => !!authState.user)
 
-  async function login(email: string, password: string) {
+  function signIn() {
     authState.loading = true
     authState.error = null
-
-    try {
-      const data = await $fetch<{ user: User }>('/api/auth/login', {
-        method: 'POST',
-        body: { email, password },
-      })
-
-      authState.user = data.user
-      await router.push('/dashboard')
-    }
-    catch (err: any) {
-      authState.error = err?.data?.message || 'Invalid email or password'
-      throw err
-    }
-    finally {
-      authState.loading = false
-    }
-  }
-
-  async function register(name: string, email: string, password: string) {
-    authState.loading = true
-    authState.error = null
-
-    try {
-      const data = await $fetch<{ user: User }>('/api/auth/register', {
-        method: 'POST',
-        body: { name, email, password },
-      })
-
-      authState.user = data.user
-      await router.push('/dashboard')
-    }
-    catch (err: any) {
-      authState.error = err?.data?.message || 'Registration failed'
-      throw err
-    }
-    finally {
-      authState.loading = false
-    }
+    window.location.href = '/api/auth/google'
   }
 
   async function logout() {
@@ -89,6 +52,19 @@ export function useAuth() {
     }
   }
 
+  function checkOAuthError() {
+    const error = route.query.error as string | undefined
+    if (error) {
+      const messages: Record<string, string> = {
+        access_denied: 'Sign-in was cancelled.',
+        oauth_failed: 'Google sign-in failed. Please try again.',
+        invalid_state: 'Sign-in session expired. Please try again.',
+        missing_params: 'Something went wrong. Please try again.',
+      }
+      authState.error = messages[error] || 'An unexpected error occurred.'
+    }
+  }
+
   function clearError() {
     authState.error = null
   }
@@ -98,10 +74,10 @@ export function useAuth() {
     loading: computed(() => authState.loading),
     error: computed(() => authState.error),
     isAuthenticated,
-    login,
-    register,
+    signIn,
     logout,
     fetchUser,
+    checkOAuthError,
     clearError,
   }
 }
